@@ -5,9 +5,9 @@ Created on Jul 31, 2013
 '''
 
 if __name__ == '__main__':
-    from Player import Player
-    from Team import Team
-    from Game import Game
+    from playball import Player
+    from playball import Team
+    from playball import Game
     from time import time
     
     p = Player()
@@ -25,7 +25,7 @@ if __name__ == '__main__':
         home.lineup[i] = p
         away.lineup[i] = p
     
-    GAMES = 10000
+    GAMES = 1000
     
     start = time()
     
