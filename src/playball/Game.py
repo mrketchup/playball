@@ -40,7 +40,7 @@ def advanceRunners(batter, result, state):
     event.batter = batter
     event.battingResult = result
     
-    for i in range(3):
+    for i in range(1, len(state.bases)):
         event.runners[i] = state.bases[i]
         if event.runners[i] is not None:
             event.runnerDestinations[i] = i
@@ -125,17 +125,20 @@ def advanceRunners(batter, result, state):
 
 
 def printEvent(event):
-    print '-' * 30
-    print " - Batter:", event.batter.fullName
-    print " - Batting Result:", event.battingResult
-    print " - Batter Destination:", event.batterDestination
+    print "Batter:", event.batter.fullName
+    print "Batting Result:", event.battingResult
     
     for i in range(1, len(event.runners)):
         name = 'None' if event.runners[i] is None else event.runners[i].fullName
-        print " - Runner on %d (%s) goes to %s" % (i, name, str(event.runnerDestinations[i]))
-        
-    print " - Runs On Play:", event.runsOnPlay
-    print " - Outs On Play:", event.outsOnPlay
+        print " * Runner on %d (%s) goes to %s" % (i, name, str(event.runnerDestinations[i]))
+    
+def printState(state):
+    tb = "Bottom" if state.inningBottom else "Top"
+    print "-------------- %6s  %2d --------------" % (tb, state.inning)
+    print "%s: %d" % (state.awayTeam.fullName, state.awayRuns)
+    print "%s: %d" % (state.homeTeam.fullName, state.homeRuns)
+    print "Outs:", state.outs
+    print "-" * 40
 
 
 class Event(object):
@@ -150,18 +153,6 @@ class Event(object):
         self.runnerDestinations = [None, None, None, None]
         self.runsOnPlay = 0
         self.outsOnPlay = 0
-        
-
-
-def printState(state):
-    tb = "Bottom" if state.inningBottom else "Top"
-    print "---------- %6s %2d ----------" % (tb, state.inning)
-    print "%s: %d" % (state.awayTeam.fullName, state.awayRuns)
-    print "%s: %d" % (state.homeTeam.fullName, state.homeRuns)
-    print "Outs:", state.outs
-    print "Away Lineup Index:", state.awayLineupIndex
-    print "Home Lineup Index:", state.homeLineupIndex
-    print "Is Complete:", state.isComplete
 
 
 
@@ -197,9 +188,6 @@ class GameState(object):
         newState.homeLineupIndex = self.homeLineupIndex
         newState.awayLineupIndex = self.awayLineupIndex
         newState.isComplete = self.isComplete
-        
-#         print event.runners
-#         print event.runnerDestinations
         
         for i in range(1, len(newState.bases)):
             dest = event.runnerDestinations[i]
@@ -248,8 +236,11 @@ class Game(object):
                 result = simulatePA(batter)
                 event = advanceRunners(batter, result, self.state)
                 newState = self.state.addEvent(event)
+                
                 printState(self.state)
                 printEvent(event)
+                printState(newState)
+                
                 self.state = newState
                 
                 
@@ -266,8 +257,11 @@ class Game(object):
                     result = simulatePA(batter)
                     event = advanceRunners(batter, result, self.state)
                     newState = self.state.addEvent(event)
+                    
                     printState(self.state)
                     printEvent(event)
+                    printState(newState)
+                    
                     self.state = newState
                     
                 self.state.clearBases()
