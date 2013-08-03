@@ -36,87 +36,133 @@ def simulatePA(batter):
 
 
 def advanceRunners(batter, result, state):
-    runs = 0
+    event = Event()
+    event.batter = batter
+    event.battingResult = result
     
-    if result == 'OUT':
-        pass
+    for i in range(3):
+        event.runners[i] = state.bases[i]
+        if event.runners[i] is not None:
+            event.runnerDestinations[i] = i
+    
+    if event.battingResult == 'OUT':
+        event.batterDestination = 0
+        event.outsOnPlay += 1
         
-    elif result == '1B':            
+    elif event.battingResult == '1B':
+        event.batterDestination = 1
         rand = random()
-        if state.thirdBase is not None:
-            runs += 1
-            state.thirdBase = None
-        if state.secondBase is not None:
+        if event.runners[3] is not None:
+            event.runsOnPlay += 1
+            event.runnerDestinations[3] = 4
+        if event.runners[2] is not None:
             if rand < 0.5:
-                runs += 1
+                event.runnerDestinations[2] = 4
+                event.runsOnPlay += 1
             else:
-                state.thirdBase = state.secondBase
-            state.secondBase = None
-        if state.firstBase is not None:
+                event.runnerDestinations[2] = 3
+        if event.runners[1] is not None:
             if rand < 0.2:
-                state.thirdBase = state.firstBase
+                event.runnerDestinations[1] = 3
             else:
-                state.secondBase = state.firstBase
-            state.firstBase = None
+                event.runnerDestinations[1] = 2
         
-        state.firstBase = batter
-        
-    elif result == '2B':            
-        if state.thirdBase is not None:
-            runs += 1
-            state.thirdBase = None
-        if state.secondBase is not None:
-            runs += 1
-            state.secondBase = None
-        if state.firstBase is not None:
+    elif event.battingResult == '2B':
+        event.batterDestination = 2
+        if event.runners[3] is not None:
+            event.runsOnPlay += 1
+            event.runnerDestinations[3] = 4
+        if event.runners[2] is not None:
+            event.runsOnPlay += 1
+            event.runnerDestinations[2] = 4
+        if event.runners[1] is not None:
             if random() < 0.2:
-                runs += 1
+                event.runsOnPlay += 1
+                event.runnerDestinations[1] = 4
             else:
-                state.thirdBase = state.firstBase
-            state.firstBase = None
-            
-        state.secondBase = batter
+                event.runnerDestinations[1] = 3
         
-    elif result == '3B':            
-        if state.thirdBase is not None:
-            runs += 1
-            state.thirdBase = None
-        if state.secondBase is not None:
-            runs += 1
-            state.secondBase = None
-        if state.firstBase is not None:
-            runs += 1
-            state.firstBase = None
-            
-        state.thirdBase = batter
+    elif event.battingResult == '3B':
+        event.batterDestination = 3
+        if event.runners[3] is not None:
+            event.runsOnPlay += 1
+            event.runnerDestinations[3] = 4
+        if event.runners[2] is not None:
+            event.runsOnPlay += 1
+            event.runnerDestinations[2] = 4
+        if event.runners[1] is not None:
+            event.runsOnPlay += 1
+            event.runnerDestinations[1] = 4
         
-    elif result == 'HR':
-        runs += 1
-        
-        if state.thirdBase is not None:
-            runs += 1
-            state.thirdBase = None
-        if state.secondBase is not None:
-            runs += 1
-            state.secondBase = None
-        if state.firstBase is not None:
-            runs += 1
-            state.firstBase = None
+    elif event.battingResult == 'HR':
+        event.batterDestination = 4
+        event.runsOnPlay += 1
+        if event.runners[3] is not None:
+            event.runsOnPlay += 1
+            event.runnerDestinations[3] = 4
+        if event.runners[2] is not None:
+            event.runsOnPlay += 1
+            event.runnerDestinations[2] = 4
+        if event.runners[1] is not None:
+            event.runsOnPlay += 1
+            event.runnerDestinations[1] = 4
             
-    elif result == 'BB' or result == 'HBP':            
-        if state.thirdBase is not None and state.secondBase is not None and state.firstBase is not None:
-            runs += 1
-            state.thirdBase = state.secondBase
-            state.secondBase = state.firstBase
-        elif state.secondBase is not None and state.firstBase is not None:
-            state.thirdBase = state.secondBase
-            state.secondBase = state.firstBase
-        elif state.firstBase is not None:
-            state.secondBase = state.firstBase
-            
-        state.firstBase = batter
+    elif event.battingResult == 'BB' or event.battingResult == 'HBP':
+        event.batterDestination = 1
+        if event.runners[3] is not None and event.runners[2] is not None and event.runners[1] is not None:
+            event.runsOnPlay += 1
+            event.runnerDestinations[3] = 4
+            event.runnerDestinations[2] = 3
+            event.runnerDestinations[1] = 2
+        elif event.runners[2] is not None and event.runners[1] is not None:
+            event.runnerDestinations[2] = 3
+            event.runnerDestinations[1] = 2
+        elif event.runners[1] is not None:
+            event.runnerDestinations[1] = 2
         
-    return runs
+    return event
+
+
+
+def printEvent(event):
+    print '-' * 30
+    print " - Batter:", event.batter.fullName
+    print " - Batting Result:", event.battingResult
+    print " - Batter Destination:", event.batterDestination
+    
+    for i in range(1, len(event.runners)):
+        name = 'None' if event.runners[i] is None else event.runners[i].fullName
+        print " - Runner on %d (%s) goes to %s" % (i, name, str(event.runnerDestinations[i]))
+        
+    print " - Runs On Play:", event.runsOnPlay
+    print " - Outs On Play:", event.outsOnPlay
+
+
+class Event(object):
+    '''
+    Contains all info regarding an event.
+    '''
+    def __init__(self):
+        self.batter = None
+        self.battingResult = None
+        self.batterDestination = None
+        self.runners = [None, None, None, None]
+        self.runnerDestinations = [None, None, None, None]
+        self.runsOnPlay = 0
+        self.outsOnPlay = 0
+        
+
+
+def printState(state):
+    tb = "Bottom" if state.inningBottom else "Top"
+    print "---------- %6s %2d ----------" % (tb, state.inning)
+    print "%s: %d" % (state.awayTeam.fullName, state.awayRuns)
+    print "%s: %d" % (state.homeTeam.fullName, state.homeRuns)
+    print "Outs:", state.outs
+    print "Away Lineup Index:", state.awayLineupIndex
+    print "Home Lineup Index:", state.homeLineupIndex
+    print "Is Complete:", state.isComplete
+
 
 
 class GameState(object):
@@ -124,23 +170,56 @@ class GameState(object):
     Contains all important information regarding the state of a game.
     '''
     def __init__(self):
-        self.firstBase = None
-        self.secondBase = None
-        self.thirdBase = None
+        self.bases = [None, None, None, None]
         self.homeTeam = None
         self.awayTeam = None
         self.homeRuns = 0
         self.awayRuns = 0
         self.inning = 1
+        self.inningBottom = False
         self.outs = 0
         self.homeLineupIndex = 0
         self.awayLineupIndex = 0
         self.isComplete = False
         
     def clearBases(self):
-        self.firstBase = None
-        self.secondBase = None
-        self.thirdBase = None
+        self.bases = [None, None, None, None]
+        
+    def addEvent(self, event):
+        newState = GameState()
+        newState.homeTeam = self.homeTeam
+        newState.awayTeam = self.awayTeam
+        newState.homeRuns = self.homeRuns
+        newState.awayRuns = self.awayRuns
+        newState.inning = self.inning
+        newState.inningBottom = self.inningBottom
+        newState.outs = self.outs
+        newState.homeLineupIndex = self.homeLineupIndex
+        newState.awayLineupIndex = self.awayLineupIndex
+        newState.isComplete = self.isComplete
+        
+#         print event.runners
+#         print event.runnerDestinations
+        
+        for i in range(1, len(newState.bases)):
+            dest = event.runnerDestinations[i]
+            if dest is not None and dest in range(1, len(newState.bases)):
+                newState.bases[dest] = event.runners[i]
+                
+        if event.batterDestination == 0:
+            newState.outs += 1
+        elif event.batterDestination < 4:
+            newState.bases[event.batterDestination] = event.batter
+            
+        if newState.inningBottom:
+            newState.homeRuns += event.runsOnPlay
+            newState.homeLineupIndex = (newState.homeLineupIndex + 1) % 9
+        else:
+            newState.awayRuns += event.runsOnPlay
+            newState.awayLineupIndex = (newState.awayLineupIndex + 1) % 9
+            
+        return newState
+            
         
 
 
@@ -163,30 +242,33 @@ class Game(object):
         
         while self.state.inning <= 9 or self.state.homeRuns == self.state.awayRuns:            
             self.state.outs = 0
+            self.state.inningBottom = False
             while self.state.outs < 3:
                 batter = self.state.awayTeam.lineup[self.state.awayLineupIndex]
                 result = simulatePA(batter)
-                runs = advanceRunners(batter, result, self.state)
-                self.state.awayRuns += runs
-                if result == 'OUT':
-                    self.state.outs += 1
-                self.state.awayLineupIndex = (self.state.awayLineupIndex + 1) % 9
+                event = advanceRunners(batter, result, self.state)
+                newState = self.state.addEvent(event)
+                printState(self.state)
+                printEvent(event)
+                self.state = newState
+                
                 
             self.state.clearBases()
             
             if self.state.homeRuns <= self.state.awayRuns or self.state.inning < 9:
                 
                 self.state.outs = 0
+                self.state.inningBottom = True
                 while self.state.outs < 3:
                     if self.state.homeRuns > self.state.awayRuns and self.state.inning >= 9:
                         break
                     batter = self.state.homeTeam.lineup[self.state.homeLineupIndex]
                     result = simulatePA(batter)
-                    runs = advanceRunners(batter, result, self.state)
-                    self.state.homeRuns += runs
-                    if result == 'OUT':
-                        self.state.outs += 1
-                    self.state.homeLineupIndex = (self.state.homeLineupIndex + 1) % 9
+                    event = advanceRunners(batter, result, self.state)
+                    newState = self.state.addEvent(event)
+                    printState(self.state)
+                    printEvent(event)
+                    self.state = newState
                     
                 self.state.clearBases()
             

@@ -25,7 +25,7 @@ if __name__ == '__main__':
         home.lineup[i] = p
         away.lineup[i] = p
     
-    GAMES = 1000
+    GAMES = 1
     
     start = time()
     
