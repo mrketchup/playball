@@ -35,7 +35,7 @@ class GameState(object):
         for i in range(1, len(newState.bases)):
             dest = event.runnerDestinations[i]
             if dest is not None and dest in range(1, len(newState.bases)):
-                newState.bases[dest] = event.runners[i]
+                newState.bases[dest] = self.bases[i]
                 
         if newState.inningBottom:
             newState.homeRuns += event.runsOnPlay

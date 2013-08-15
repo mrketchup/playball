@@ -5,7 +5,7 @@ Handles all the logic behind game events.
 '''
 
 from random import random
-from GameEvent import GameEvent
+from GameEvent import Play
 
 def simulatePA(batter):
     '''
@@ -37,13 +37,13 @@ def simulatePA(batter):
 
 
 def advanceRunners(batter, result, state):
-    event = GameEvent()
+    event = Play()
     event.batter = batter
     event.battingResult = result
     
     for i in range(1, len(state.bases)):
-        event.runners[i] = state.bases[i]
-        if event.runners[i] is not None:
+        state.bases[i] = state.bases[i]
+        if state.bases[i] is not None:
             event.runnerDestinations[i] = i
     
     if event.battingResult == 'OUT':
@@ -53,16 +53,16 @@ def advanceRunners(batter, result, state):
     elif event.battingResult == '1B':
         event.batterDestination = 1
         rand = random()
-        if event.runners[3] is not None:
+        if state.bases[3] is not None:
             event.runsOnPlay += 1
             event.runnerDestinations[3] = 4
-        if event.runners[2] is not None:
+        if state.bases[2] is not None:
             if rand < 0.5:
                 event.runnerDestinations[2] = 4
                 event.runsOnPlay += 1
             else:
                 event.runnerDestinations[2] = 3
-        if event.runners[1] is not None:
+        if state.bases[1] is not None:
             if rand < 0.2:
                 event.runnerDestinations[1] = 3
             else:
@@ -70,13 +70,13 @@ def advanceRunners(batter, result, state):
         
     elif event.battingResult == '2B':
         event.batterDestination = 2
-        if event.runners[3] is not None:
+        if state.bases[3] is not None:
             event.runsOnPlay += 1
             event.runnerDestinations[3] = 4
-        if event.runners[2] is not None:
+        if state.bases[2] is not None:
             event.runsOnPlay += 1
             event.runnerDestinations[2] = 4
-        if event.runners[1] is not None:
+        if state.bases[1] is not None:
             if random() < 0.2:
                 event.runsOnPlay += 1
                 event.runnerDestinations[1] = 4
@@ -85,40 +85,40 @@ def advanceRunners(batter, result, state):
         
     elif event.battingResult == '3B':
         event.batterDestination = 3
-        if event.runners[3] is not None:
+        if state.bases[3] is not None:
             event.runsOnPlay += 1
             event.runnerDestinations[3] = 4
-        if event.runners[2] is not None:
+        if state.bases[2] is not None:
             event.runsOnPlay += 1
             event.runnerDestinations[2] = 4
-        if event.runners[1] is not None:
+        if state.bases[1] is not None:
             event.runsOnPlay += 1
             event.runnerDestinations[1] = 4
         
     elif event.battingResult == 'HR':
         event.batterDestination = 4
         event.runsOnPlay += 1
-        if event.runners[3] is not None:
+        if state.bases[3] is not None:
             event.runsOnPlay += 1
             event.runnerDestinations[3] = 4
-        if event.runners[2] is not None:
+        if state.bases[2] is not None:
             event.runsOnPlay += 1
             event.runnerDestinations[2] = 4
-        if event.runners[1] is not None:
+        if state.bases[1] is not None:
             event.runsOnPlay += 1
             event.runnerDestinations[1] = 4
             
     elif event.battingResult == 'BB' or event.battingResult == 'HBP':
         event.batterDestination = 1
-        if event.runners[3] is not None and event.runners[2] is not None and event.runners[1] is not None:
+        if state.bases[3] is not None and state.bases[2] is not None and state.bases[1] is not None:
             event.runsOnPlay += 1
             event.runnerDestinations[3] = 4
             event.runnerDestinations[2] = 3
             event.runnerDestinations[1] = 2
-        elif event.runners[2] is not None and event.runners[1] is not None:
+        elif state.bases[2] is not None and state.bases[1] is not None:
             event.runnerDestinations[2] = 3
             event.runnerDestinations[1] = 2
-        elif event.runners[1] is not None:
+        elif state.bases[1] is not None:
             event.runnerDestinations[1] = 2
         
     return event

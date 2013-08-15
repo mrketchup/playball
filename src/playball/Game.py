@@ -8,23 +8,25 @@ Created on Jul 31, 2013
 from GameState import GameState
 from Team import Team
 import GameEngine
-
-def printEvent(event):
+    
+def notify(preState, postState, event):
+    tb = "Bottom" if preState.inningBottom else "Top"
+    print "-------------- %6s  %2d --------------" % (tb, preState.inning)
+    print "Away: %s: %d" % (preState.awayTeam.fullName, preState.awayRuns)
+    print "Home: %s: %d" % (preState.homeTeam.fullName, preState.homeRuns)
+    print "Outs:", preState.outs
+    print "-" * 40
+    
     print "Batter:", event.batter.fullName
     print "Batting Result:", event.battingResult
     
-    for i in range(1, len(event.runners)):
-        name = 'None' if event.runners[i] is None else event.runners[i].fullName
-        print " * Runner on %d (%s) goes to %s" % (i, name, str(event.runnerDestinations[i]))
-    
-def printState(state):
-    tb = "Bottom" if state.inningBottom else "Top"
-    print "-------------- %6s  %2d --------------" % (tb, state.inning)
-    print "Away: %s: %d" % (state.awayTeam.fullName, state.awayRuns)
-    print "Home: %s: %d" % (state.homeTeam.fullName, state.homeRuns)
-    print "Outs:", state.outs
-    print "-" * 40
-    
+    for i in range(1, len(preState.bases)):
+        if preState.bases[i] is not None and i != event.runnerDestinations[i]:
+            if event.runnerDestinations[i] >= 4:
+                print " * %s scores." % (preState.bases[i].fullName)
+            else:
+                print " * %s goes to %s." % (preState.bases[i].fullName, \
+                                             event.runnerDestinations[i])
 
 
 class Game(object):
@@ -53,9 +55,7 @@ class Game(object):
             preState = self.state
             postState = self.state.addEvent(event)
         
-            printState(preState)
-            printEvent(event)
-            printState(postState)
+            notify(preState, postState, event)
             
             self.state = postState
         if self.state.inningBottom:
