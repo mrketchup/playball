@@ -18,20 +18,20 @@ def simulatePA(batter):
     nBB = nHR + batter.rateBB
     nHBP = nBB + batter.rateHBP
     
-    result = 'OUT'
+    result = Play.PlayTypes.GENERIC_OUT
     rand = random()
     if rand < n1B:
-        result = '1B'
+        result = Play.PlayTypes.SINGLE
     elif rand < n2B:
-        result = '2B'
+        result = Play.PlayTypes.DOUBLE
     elif rand < n3B:
-        result = '3B'
+        result = Play.PlayTypes.TRIPLE
     elif rand < nHR:
-        result = 'HR'
+        result = Play.PlayTypes.HOMERUN
     elif rand < nBB:
-        result = 'BB'
+        result = Play.PlayTypes.WALK
     elif rand < nHBP:
-        result = 'HBP'
+        result = Play.PlayTypes.HIT_BY_PITCH
         
     return result
 
@@ -42,84 +42,83 @@ def advanceRunners(batter, result, state):
     event.battingResult = result
     
     for i in range(1, len(state.bases)):
-        state.bases[i] = state.bases[i]
         if state.bases[i] is not None:
             event.runnerDestinations[i] = i
     
-    if event.battingResult == 'OUT':
-        event.batterDestination = 0
+    if event.battingResult == Play.PlayTypes.GENERIC_OUT:
+        event.batterDestination = Play.Destinations.OUT
         event.outsOnPlay += 1
         
-    elif event.battingResult == '1B':
-        event.batterDestination = 1
+    elif event.battingResult == Play.PlayTypes.SINGLE:
+        event.batterDestination = Play.Destinations.FIRST
         rand = random()
         if state.bases[3] is not None:
             event.runsOnPlay += 1
-            event.runnerDestinations[3] = 4
+            event.runnerDestinations[3] = Play.Destinations.EARNED_RUN
         if state.bases[2] is not None:
             if rand < 0.5:
-                event.runnerDestinations[2] = 4
+                event.runnerDestinations[2] = Play.Destinations.EARNED_RUN
                 event.runsOnPlay += 1
             else:
-                event.runnerDestinations[2] = 3
+                event.runnerDestinations[2] = Play.Destinations.THIRD
         if state.bases[1] is not None:
             if rand < 0.2:
-                event.runnerDestinations[1] = 3
+                event.runnerDestinations[1] = Play.Destinations.THIRD
             else:
-                event.runnerDestinations[1] = 2
+                event.runnerDestinations[1] = Play.Destinations.SECOND
         
-    elif event.battingResult == '2B':
-        event.batterDestination = 2
+    elif event.battingResult == Play.PlayTypes.DOUBLE:
+        event.batterDestination = Play.Destinations.SECOND
         if state.bases[3] is not None:
             event.runsOnPlay += 1
-            event.runnerDestinations[3] = 4
+            event.runnerDestinations[3] = Play.Destinations.EARNED_RUN
         if state.bases[2] is not None:
             event.runsOnPlay += 1
-            event.runnerDestinations[2] = 4
+            event.runnerDestinations[2] = Play.Destinations.EARNED_RUN
         if state.bases[1] is not None:
             if random() < 0.2:
                 event.runsOnPlay += 1
-                event.runnerDestinations[1] = 4
+                event.runnerDestinations[1] = Play.Destinations.EARNED_RUN
             else:
-                event.runnerDestinations[1] = 3
+                event.runnerDestinations[1] = Play.Destinations.THIRD
         
-    elif event.battingResult == '3B':
-        event.batterDestination = 3
+    elif event.battingResult == Play.PlayTypes.TRIPLE:
+        event.batterDestination = Play.Destinations.THIRD
         if state.bases[3] is not None:
             event.runsOnPlay += 1
-            event.runnerDestinations[3] = 4
+            event.runnerDestinations[3] = Play.Destinations.EARNED_RUN
         if state.bases[2] is not None:
             event.runsOnPlay += 1
-            event.runnerDestinations[2] = 4
+            event.runnerDestinations[2] = Play.Destinations.EARNED_RUN
         if state.bases[1] is not None:
             event.runsOnPlay += 1
-            event.runnerDestinations[1] = 4
+            event.runnerDestinations[1] = Play.Destinations.EARNED_RUN
         
-    elif event.battingResult == 'HR':
-        event.batterDestination = 4
+    elif event.battingResult == Play.PlayTypes.HOMERUN:
+        event.batterDestination = Play.Destinations.EARNED_RUN
         event.runsOnPlay += 1
         if state.bases[3] is not None:
             event.runsOnPlay += 1
-            event.runnerDestinations[3] = 4
+            event.runnerDestinations[3] = Play.Destinations.EARNED_RUN
         if state.bases[2] is not None:
             event.runsOnPlay += 1
-            event.runnerDestinations[2] = 4
+            event.runnerDestinations[2] = Play.Destinations.EARNED_RUN
         if state.bases[1] is not None:
             event.runsOnPlay += 1
-            event.runnerDestinations[1] = 4
+            event.runnerDestinations[1] = Play.Destinations.EARNED_RUN
             
-    elif event.battingResult == 'BB' or event.battingResult == 'HBP':
-        event.batterDestination = 1
+    elif event.battingResult == Play.PlayTypes.WALK or event.battingResult == Play.PlayTypes.HIT_BY_PITCH:
+        event.batterDestination = Play.Destinations.FIRST
         if state.bases[3] is not None and state.bases[2] is not None and state.bases[1] is not None:
             event.runsOnPlay += 1
-            event.runnerDestinations[3] = 4
-            event.runnerDestinations[2] = 3
-            event.runnerDestinations[1] = 2
+            event.runnerDestinations[3] = Play.Destinations.EARNED_RUN
+            event.runnerDestinations[2] = Play.Destinations.THIRD
+            event.runnerDestinations[1] = Play.Destinations.SECOND
         elif state.bases[2] is not None and state.bases[1] is not None:
-            event.runnerDestinations[2] = 3
-            event.runnerDestinations[1] = 2
+            event.runnerDestinations[2] = Play.Destinations.THIRD
+            event.runnerDestinations[1] = Play.Destinations.SECOND
         elif state.bases[1] is not None:
-            event.runnerDestinations[1] = 2
+            event.runnerDestinations[1] = Play.Destinations.SECOND
         
     return event
 
@@ -129,5 +128,4 @@ def nextEvent(state):
         batter = state.homeTeam.lineup[state.homeLineupIndex]
     else:
         batter = state.awayTeam.lineup[state.awayLineupIndex]
-    result = simulatePA(batter)
-    return advanceRunners(batter, result, state)
+    return advanceRunners(batter, simulatePA(batter), state)
