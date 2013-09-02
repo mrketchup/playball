@@ -122,10 +122,11 @@ def advanceRunners(batter, result, state):
         
     return event
 
-def nextEvent(state):
-    batter = None
-    if state.inningBottom:
-        batter = state.homeTeam.lineup[state.homeLineupIndex]
-    else:
-        batter = state.awayTeam.lineup[state.awayLineupIndex]
-    return advanceRunners(batter, simulatePA(batter), state)
+class GameEngine(object):
+    def nextEvent(self, state):
+        batter = None
+        if state.inningBottom:
+            batter = state.homeTeam.lineup[state.homeLineupIndex]
+        else:
+            batter = state.awayTeam.lineup[state.awayLineupIndex]
+        return advanceRunners(batter, simulatePA(batter), state)
