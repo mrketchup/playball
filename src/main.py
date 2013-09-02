@@ -121,7 +121,7 @@ if __name__ == '__main__':
 #     start = time()
     print
     for i in range(GAMES):
-        game = Game(home, away)
+        game = Game(homeTeam=home, awayTeam=away)
         game.addObserver(Obs())
         game.play()
         print "--------------    FINAL   --------------"
