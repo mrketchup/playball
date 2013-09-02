@@ -5,6 +5,30 @@ Created on Jul 31, 2013
 '''
 
 from random import random as rand
+from playball import GameObserver
+from playball.GameEvent import Play
+
+class Obs(GameObserver):
+    def notify(self, preState, postState, event):
+        tb = "Bottom" if preState.inningBottom else "Top"
+        print "-------------- %6s  %2d --------------" % (tb, preState.inning)
+        print "Away: %s: %d" % (preState.awayTeam.fullName(), preState.awayRuns)
+        print "Home: %s: %d" % (preState.homeTeam.fullName(), preState.homeRuns)
+        print "Outs:", preState.outs
+        print "-" * 40
+        
+        print "Batter:", event.batter.fullName()
+        print "Batting Result:", Play.PlayTypes.reverse_mapping[event.battingResult]
+        
+        for i in range(1, len(preState.bases)):
+            if preState.bases[i] is not None and i != event.runnerDestinations[i]:
+                if event.runnerDestinations[i] >= 4:
+                    print " * %s scores." % (preState.bases[i].fullName())
+                else:
+                    print " * %s goes to %s." % (preState.bases[i].fullName(), \
+                                                 event.runnerDestinations[i])
+        print ''
+
 # import random
 # random.seed(0)
 
@@ -98,6 +122,7 @@ if __name__ == '__main__':
     print
     for i in range(GAMES):
         game = Game(home, away)
+        game.addObserver(Obs())
         game.play()
         print "--------------    FINAL   --------------"
         print "Away: %s: %d" % (away.fullName(), game.state.awayRuns)

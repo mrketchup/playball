@@ -7,28 +7,11 @@ Created on Jul 31, 2013
 
 from GameState import GameState
 from Team import Team
-from GameEvent import Play
 import GameEngine
-    
-def notify(preState, postState, event):
-    tb = "Bottom" if preState.inningBottom else "Top"
-    print "-------------- %6s  %2d --------------" % (tb, preState.inning)
-    print "Away: %s: %d" % (preState.awayTeam.fullName(), preState.awayRuns)
-    print "Home: %s: %d" % (preState.homeTeam.fullName(), preState.homeRuns)
-    print "Outs:", preState.outs
-    print "-" * 40
-    
-    print "Batter:", event.batter.fullName()
-    print "Batting Result:", Play.PlayTypes.reverse_mapping[event.battingResult]
-    
-    for i in range(1, len(preState.bases)):
-        if preState.bases[i] is not None and i != event.runnerDestinations[i]:
-            if event.runnerDestinations[i] >= 4:
-                print " * %s scores." % (preState.bases[i].fullName())
-            else:
-                print " * %s goes to %s." % (preState.bases[i].fullName(), \
-                                             event.runnerDestinations[i])
-    print ''
+
+class GameObserver(object):
+    def notify(self, preState, postState, event):
+        raise NotImplementedError
 
 
 class Game(object):
@@ -42,6 +25,7 @@ class Game(object):
         if awayTeam is None: awayTeam = Team()
         self.state.homeTeam = homeTeam
         self.state.awayTeam = awayTeam
+        self.observers = []
         
     def play(self):
         while self.state.inning <= 9 or self.state.homeRuns == self.state.awayRuns:
@@ -57,7 +41,7 @@ class Game(object):
             preState = self.state
             postState = self.state.addEvent(event)
         
-            notify(preState, postState, event)
+            self._notify(preState, postState, event)
             
             self.state = postState
         if self.state.inningBottom:
@@ -68,3 +52,13 @@ class Game(object):
         return not (self.state.inningBottom and \
                     self.state.homeRuns > self.state.awayRuns and \
                     self.state.inning >= 9)
+        
+    def addObserver(self, observer):
+        self.observers.append(observer)
+        
+    def removeObserver(self, observer):
+        self.observers.remove(observer)
+        
+    def _notify(self, preState, postState, event):
+        for observer in self.observers:
+            observer.notify(preState, postState, event)
