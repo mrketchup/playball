@@ -1,4 +1,4 @@
 playball
 ========
 
-Statistic-Based Baseball Sim written in Python
+Statistics-Based Baseball Sim written in Python
