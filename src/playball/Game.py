@@ -28,17 +28,19 @@ class Game():
             self.engine = engine
         
     def play(self):
-        while self.state.inning <= 9 or self.state.homeRuns == self.state.awayRuns:
+        while not self.state.completed and (self.state.inning <= 9 or self.state.homeRuns == self.state.awayRuns):
             for preState, postState, event in self._playHalfInning():
                 yield preState, postState, event
-            if self.state.homeRuns <= self.state.awayRuns or self.state.inning < 9:
+            if self.state.inning < 9 or self.state.homeRuns <= self.state.awayRuns:
                 for preState, postState, event in self._playHalfInning():
                     yield preState, postState, event
+            else:
+                self.state.completed = True
 
     def _playHalfInning(self):
         self.state.outs = 0
         self.state.clearBases()
-        while self.state.outs < 3 and self._continuePlaying:
+        while self.state.outs < 3 and self._continuePlaying():
             event = self.engine.nextEvent(self.state)
             preState = self.state
             postState = self.state.addEvent(event)

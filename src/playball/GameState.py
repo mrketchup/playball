@@ -19,6 +19,7 @@ class GameState(object):
         self.outs = 0
         self.homeLineupIndex = 0
         self.awayLineupIndex = 0
+        self.completed = False
         
     def addEvent(self, event):
         newState = GameState()
