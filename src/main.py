@@ -6,6 +6,7 @@ Created on Jul 31, 2013
 
 from random import random as rand
 from playball.GameEvent import Play
+import names
 
 
 def notify(preState, postState, event):
@@ -31,21 +32,6 @@ def notify(preState, postState, event):
 
 # import random
 # random.seed(0)
-
-def randomFirstName():
-    names = ['Arthur', 'Bill', 'Carlos', 'Doug', 'Eddie', 'Fernando', 'Greg',
-             'Hank', 'Isaac', 'Juan', 'Kevin', 'Lenny', 'Matt', 'Neil', 'Oscar',
-             'Pete', 'Quint', 'Robby', 'Sam', 'Tom', 'Usbaldo', 'Vick',
-             'Walter', 'Xavier', 'Yanni', 'Zak']
-    return names[int(rand() * len(names))]
-
-def randomLastName():
-    names = ['Arieta', 'Bishop', 'Christopher', 'Davis', 'Erbe', 'Franklin',
-             'Gregory', 'Henry', 'Isabela', 'Jones', 'Kendrick', 'Leonard',
-             'Markson', 'Newland', "O'Brien", 'Paulson', 'Quintons', 'Raul',
-             'Stevens', 'Tomlinson', 'Umbridge', 'Victorino', 'Waters',
-             'Xavier', 'Young', 'Zackery']
-    return names[int(rand() * len(names))]
 
 def AB(p):
     return (1 - p.rateBB - p.rateHBP)
@@ -79,7 +65,7 @@ def playerString(p):
     return '%20s (%s/%s/%s/%s)' % (p.fullName(), ba, obp, slg, ops)
 
 def randomPlayer():
-    p = Player(randomFirstName(), randomLastName())
+    p = Player(names.get_first_name(gender='male'), names.get_last_name())
     p.rate1B = rand() * 0.075 + 0.100
     p.rate2B = rand() * 0.030 + 0.030
     p.rate3B = rand() * 0.014 + 0.001
