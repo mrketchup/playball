@@ -8,10 +8,6 @@ Created on Jul 31, 2013
 from GameState import GameState
 from Team import Team
 from GameEngine import GameEngine
-
-class GameObserver(object):
-    def notify(self, preState, postState, event):
-        raise NotImplementedError
         
     
 class Game():
@@ -25,7 +21,6 @@ class Game():
         if awayTeam is None: awayTeam = Team()
         self.state.homeTeam = homeTeam
         self.state.awayTeam = awayTeam
-        self.observers = []
         
         if engine is None:
             self.engine = GameEngine()
@@ -34,36 +29,28 @@ class Game():
         
     def play(self):
         while self.state.inning <= 9 or self.state.homeRuns == self.state.awayRuns:
-            self._playHalfInning()
+            for preState, postState, event in self._playHalfInning():
+                yield preState, postState, event
             if self.state.homeRuns <= self.state.awayRuns or self.state.inning < 9:
-                self._playHalfInning()
-                
+                for preState, postState, event in self._playHalfInning():
+                    yield preState, postState, event
+
     def _playHalfInning(self):
         self.state.outs = 0
         self.state.clearBases()
-        while self.state.outs < 3 and self._continuePlaying():
+        while self.state.outs < 3 and self._continuePlaying:
             event = self.engine.nextEvent(self.state)
             preState = self.state
             postState = self.state.addEvent(event)
-        
-            self._notify(preState, postState, event)
-            
+
+            yield preState, postState, event
+
             self.state = postState
         if self.state.inningBottom:
             self.state.inning += 1
         self.state.inningBottom = not self.state.inningBottom
-        
+
     def _continuePlaying(self):
         return not (self.state.inningBottom and
                     self.state.homeRuns > self.state.awayRuns and
                     self.state.inning >= 9)
-        
-    def addObserver(self, observer):
-        self.observers.append(observer)
-        
-    def removeObserver(self, observer):
-        self.observers.remove(observer)
-        
-    def _notify(self, preState, postState, event):
-        for observer in self.observers:
-            observer.notify(preState, postState, event)
