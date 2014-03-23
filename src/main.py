@@ -85,22 +85,22 @@ if __name__ == '__main__':
     
     for i in range(9):
         p = randomPlayer()
-        away.lineup[i] = p
+        away.offensiveLineup[i] = p
     
     for i in range(9):
         p = randomPlayer()
-        home.lineup[i] = p
+        home.offensiveLineup[i] = p
         
-    away.lineup = orderLineup(away.lineup)
-    home.lineup = orderLineup(home.lineup)
+    away.offensiveLineup = orderLineup(away.offensiveLineup)
+    home.offensiveLineup = orderLineup(home.offensiveLineup)
     
     print 'AWAY:'
     for i in range(9):
-        print str(i+1) + ": " + playerString(away.lineup[i])
+        print str(i+1) + ": " + playerString(away.offensiveLineup[i])
     
     print 'HOME:'
     for i in range(9):
-        print str(i+1) + ": " + playerString(home.lineup[i])
+        print str(i+1) + ": " + playerString(home.offensiveLineup[i])
     
     GAMES = 1
     

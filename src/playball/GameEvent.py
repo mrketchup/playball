@@ -28,7 +28,35 @@ class Play(GameEvent):
         
         strikes - The number of strikes
         
-        pitchSequence - The sequence of pitches
+        pitchSequence - The sequence of pitches as characters in a string. The
+            possible characters are:
+                +  following pickoff throw by the catcher
+                *  indicates the following pitch was blocked by the catcher
+                .  marker for play not involving the batter
+                1  pickoff throw to first
+                2  pickoff throw to second
+                3  pickoff throw to third
+                >  Indicates a runner going on the pitch
+
+                B  ball
+                C  called strike
+                F  foul
+                H  hit batter
+                I  intentional ball
+                K  strike (unknown type)
+                L  foul bunt
+                M  missed bunt attempt
+                N  no pitch (on balks and interference calls)
+                O  foul tip on bunt
+                P  pitchout
+                Q  swinging on pitchout
+                R  foul ball on pitchout
+                S  swinging strike
+                T  foul tip
+                U  unknown or missed pitch
+                V  called ball because pitcher went to his mouth
+                X  ball put into play by batter
+                Y  ball put into play on pitchout
         
         batter - The player batting
         
@@ -76,7 +104,8 @@ class Play(GameEvent):
         
         isFoul - If the play was a foul or not
         
-        hitLocation - Where on the field the ball was hit
+        hitLocation - Where on the field the ball was hit. See
+            http://www.retrosheet.org/location.htm for details.
         
         errors - A list of errors on the play. An entry in the list will be a
             dictionary in the form of { player : errorType }. The error type is
@@ -138,4 +167,34 @@ class Substitution(GameEvent):
     '''
     
     def __init__(self):
-        pass
+        self.player = None
+        self.team = None
+        self.offensiveLineupIndex = 0
+        self.defensiveLineupIndex = 0
+
+
+class LineupAdjustment(GameEvent):
+    '''
+    '''
+
+    def __init__(self):
+        self.team = None
+        self.offensiveLineupIndex = 0
+
+
+class BattingAdjustment(GameEvent):
+    '''
+    '''
+
+    def __init__(self):
+        self.player = None
+        self.hand = None
+
+
+class PitchingAdjustment(GameEvent):
+    '''
+    '''
+
+    def __init__(self):
+        self.player = None
+        self.hand = None

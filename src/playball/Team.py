@@ -14,10 +14,13 @@ class Team(object):
     def __init__(self, city='Dumb City', name='Dummies'):
         self.city = city
         self.name = name
-        
-        self.lineup = []
+        self.offensiveLineup = []
+        self.defensiveLineup = []
+
         for i in range(9):
-            self.lineup.append(Player())
+            player = Player()
+            self.offensiveLineup.append(player)
+            self.defensiveLineup.append(player)
         
     def fullName(self):
         return self.city + ' ' + self.name

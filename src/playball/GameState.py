@@ -17,8 +17,8 @@ class GameState(object):
         self.inning = 1
         self.inningBottom = False
         self.outs = 0
-        self.homeLineupIndex = 0
-        self.awayLineupIndex = 0
+        self.homeOffensiveLineupIndex = 0
+        self.awayOffensiveLineupIndex = 0
         self.completed = False
         
     def addEvent(self, event):
@@ -30,8 +30,8 @@ class GameState(object):
         newState.inning = self.inning
         newState.inningBottom = self.inningBottom
         newState.outs = self.outs
-        newState.homeLineupIndex = self.homeLineupIndex
-        newState.awayLineupIndex = self.awayLineupIndex
+        newState.homeOffensiveLineupIndex = self.homeOffensiveLineupIndex
+        newState.awayOffensiveLineupIndex = self.awayOffensiveLineupIndex
         
         for i in range(1, len(newState.bases)):
             dest = event.runnerDestinations[i]
@@ -40,10 +40,10 @@ class GameState(object):
                 
         if newState.inningBottom:
             newState.homeRuns += event.runsOnPlay
-            newState.homeLineupIndex = (newState.homeLineupIndex + 1) % 9
+            newState.homeOffensiveLineupIndex = (newState.homeOffensiveLineupIndex + 1) % 9
         else:
             newState.awayRuns += event.runsOnPlay
-            newState.awayLineupIndex = (newState.awayLineupIndex + 1) % 9
+            newState.awayOffensiveLineupIndex = (newState.awayOffensiveLineupIndex + 1) % 9
                 
         if event.batterDestination == 0:
             newState.outs += 1
