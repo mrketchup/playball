@@ -28,16 +28,8 @@ class Play(GameEvent):
         
         strikes - The number of strikes
         
-        pitchSequence - The sequence of pitches as characters in a string. The
-            possible characters are:
-                +  following pickoff throw by the catcher
-                *  indicates the following pitch was blocked by the catcher
-                .  marker for play not involving the batter
-                1  pickoff throw to first
-                2  pickoff throw to second
-                3  pickoff throw to third
-                >  Indicates a runner going on the pitch
-
+        pitchSequence - The sequence list of pitches. All of the possible pitch
+            types are:
                 B  ball
                 C  called strike
                 F  foul
@@ -57,10 +49,20 @@ class Play(GameEvent):
                 V  called ball because pitcher went to his mouth
                 X  ball put into play by batter
                 Y  ball put into play on pitchout
+
+                1  pickoff throw to first
+                2  pickoff throw to second
+                3  pickoff throw to third
+                >  Indicates a runner going on the following pitch
+                +  indicated the following pickoff throw by the catcher
+                *  indicates the following pitch was blocked by the catcher
+                .  marker for play not involving the batter
         
         batter - The player batting
         
         pitcher - The player pitching
+
+        fielders - The sequence of all the fielders involved in the play
         
         playType - The type of play. All the possible types are:
                 Generic out
@@ -146,9 +148,10 @@ class Play(GameEvent):
     def __init__(self):
         self.balls = 0
         self.strikes = 0
-        self.pitchSequence = None
+        self.pitchSequence = []
         self.batter = None
         self.pitcher = None
+        self.fielders = []
         self.playType = 0   
         self.isSacHit = False
         self.isSacFly = False
@@ -198,3 +201,11 @@ class PitchingAdjustment(GameEvent):
     def __init__(self):
         self.player = None
         self.hand = None
+
+
+class Comment(GameEvent):
+    '''
+    '''
+
+    def __init__(self):
+        self.comment = None
