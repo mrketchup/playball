@@ -39,3 +39,4 @@ nosetests.xml
 
 # PyCharm
 /.idea/workspace.xml
+/.idea/dictionaries/
