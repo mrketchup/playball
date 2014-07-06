@@ -29,8 +29,11 @@ class Game():
         
     def play(self):
         while not self.state.completed and (self.state.inning <= 9 or self.state.homeRuns == self.state.awayRuns):
+            # play top half of inning
             for preState, postState, event in self._playHalfInning():
                 yield preState, postState, event
+
+            # play bottom half of inning
             if self.state.inning < 9 or self.state.homeRuns <= self.state.awayRuns:
                 for preState, postState, event in self._playHalfInning():
                     yield preState, postState, event
