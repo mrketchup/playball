@@ -68,12 +68,12 @@ def playerString(p):
 
 def randomPlayer():
     p = Player(names.get_first_name(gender='male'), names.get_last_name())
-    p.rate1B = rand() * 0.075 + 0.100
-    p.rate2B = rand() * 0.030 + 0.030
-    p.rate3B = rand() * 0.014 + 0.001
-    p.rateHR = rand() * 0.045 + 0.005
-    p.rateBB = rand() * 0.160 + 0.015
-    p.rateHBP = rand() * 0.012 + 0.003
+    p.rate1B = random.gauss(0.154, 0.051)
+    p.rate2B = random.gauss(0.044, 0.015)
+    p.rate3B = random.gauss(0.004, 0.001)
+    p.rateHR = random.gauss(0.025, 0.008)
+    p.rateBB = random.gauss(0.079, 0.026)
+    p.rateHBP = random.gauss(0.008, 0.003)
     return p
 
 if __name__ == '__main__':
@@ -87,10 +87,14 @@ if __name__ == '__main__':
     
     for i in range(9):
         p = randomPlayer()
+        while BA(p) < .2:
+            p = randomPlayer()
         away.offensiveLineup[i] = p
     
     for i in range(9):
         p = randomPlayer()
+        while BA(p) < .2:
+            p = randomPlayer()
         home.offensiveLineup[i] = p
         
     away.offensiveLineup = orderLineup(away.offensiveLineup)
