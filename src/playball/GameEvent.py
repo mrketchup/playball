@@ -1,27 +1,34 @@
-'''
+"""
 Created on Aug 5, 2013
 
 @author: mejones
-'''
+"""
+
 
 class Enum(object):
-    '''Used for putting together an enum.
+    """
+    Used for putting together an enum.
     TODO: Move to Utils when Sam commits it
-    '''
+    """
+
     def __init__(self, *sequential, **named):
         self.__dict__ = dict(zip(sequential, range(len(sequential))), **named)
-        self.reverse_mapping = dict((value, key) for key, value in self.__dict__.iteritems())
+        self.reverse_mapping = dict(
+            (value, key) for key, value in self.__dict__.iteritems())
+
 
 class GameEvent(object):
-    '''
-    '''
-    
+    """
+
+    """
+
     def __init__(self):
         pass
-        
-        
+
+
 class Play(GameEvent):
-    '''Contains all info regarding a play.
+    """
+    Contains all info regarding a play.
     
     Attributes:
         balls - The number of balls
@@ -131,28 +138,29 @@ class Play(GameEvent):
                 5: UNEARNED_RUN
         
         runsOnPlay - The number of runs scored on the play
-    '''
-    
+    """
+
     PlayTypes = Enum("GENERIC_OUT", "STRIKEOUT", "STOLEN_BASE",
                      "DEFENSIVE_INDIFFERENCE", "CAUGHT_STEALING",
                      "PICKOFF_ERROR", "PICKOFF", "WILD_PITCH", "PASSED_BALL",
-                     "BALK", "FOUL_ERROR", "WALK", "INTENIONAL_WALK",
+                     "BALK", "FOUL_ERROR", "WALK", "INTENTIONAL_WALK",
                      "HIT_BY_PITCH", "INTERFERENCE", "ERROR", "FIELDERS_CHOICE",
                      "SINGLE", "DOUBLE", "TRIPLE", "HOMERUN")
-    
-    BattedBallTypes = Enum("FLY_BALL","LINE_DRIVE", "POP_UP", "GROUND_BALL")
-    
+
+    BattedBallTypes = Enum("FLY_BALL", "LINE_DRIVE", "POP_UP", "GROUND_BALL")
+
     Destinations = Enum("OUT", "FIRST", "SECOND", "THIRD", "EARNED_RUN",
                         "UNEARNED_RUN")
-    
+
     def __init__(self):
+        super(Play, self).__init__()
         self.balls = 0
         self.strikes = 0
         self.pitchSequence = []
         self.batter = None
         self.pitcher = None
         self.fielders = []
-        self.playType = 0   
+        self.playType = 0
         self.isSacHit = False
         self.isSacFly = False
         self.outsOnPlay = 0
@@ -163,13 +171,15 @@ class Play(GameEvent):
         self.batterDestination = 0
         self.runnerDestinations = [None, None, None, None]
         self.runsOnPlay = 0
-        
-    
+
+
 class Substitution(GameEvent):
-    '''
-    '''
-    
+    """
+
+    """
+
     def __init__(self):
+        super(Substitution, self).__init__()
         self.player = None
         self.team = None
         self.offensiveLineupIndex = 0
@@ -177,35 +187,43 @@ class Substitution(GameEvent):
 
 
 class LineupAdjustment(GameEvent):
-    '''
-    '''
+    """
+
+    """
 
     def __init__(self):
+        super(LineupAdjustment, self).__init__()
         self.team = None
         self.offensiveLineupIndex = 0
 
 
 class BattingAdjustment(GameEvent):
-    '''
-    '''
+    """
+
+    """
 
     def __init__(self):
+        super(BattingAdjustment, self).__init__()
         self.player = None
         self.hand = None
 
 
 class PitchingAdjustment(GameEvent):
-    '''
-    '''
+    """
+
+    """
 
     def __init__(self):
+        super(PitchingAdjustment, self).__init__()
         self.player = None
         self.hand = None
 
 
 class Comment(GameEvent):
-    '''
-    '''
+    """
+
+    """
 
     def __init__(self):
+        super(Comment, self).__init__()
         self.comment = None
