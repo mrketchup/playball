@@ -1,8 +1,8 @@
-'''
+"""
 Created on Jul 31, 2013
 
 @author: mejones
-'''
+"""
 
 from random import random as rand
 from playball.GameEvent import Play
@@ -12,26 +12,28 @@ import names
 def notify(preState, postState, event):
     tb = "Bottom" if preState.inningBottom else "Top"
     print "-------------- %6s  %2d --------------" % (tb, preState.inning)
-    print "Away: %s: %d" % (preState.awayTeam.fullName(), preState.awayRuns)
-    print "Home: %s: %d" % (preState.homeTeam.fullName(), preState.homeRuns)
+    print "Away: %s: %d" % (preState.awayTeam.full_name(), preState.awayRuns)
+    print "Home: %s: %d" % (preState.homeTeam.full_name(), preState.homeRuns)
     print "Outs:", preState.outs
     print "-" * 40
 
-    print "Batter:", event.batter.fullName()
+    print "Batter:", event.batter.full_name()
     print "Batting Result:", Play.PlayTypes.reverse_mapping[event.battingResult]
 
     for i in range(1, len(preState.bases)):
         if preState.bases[i] is not None and i != event.runnerDestinations[i]:
             if event.runnerDestinations[i] >= 4:
-                print " * %s scores." % (preState.bases[i].fullName())
+                print " * %s scores." % (preState.bases[i].full_name())
             else:
-                print " * %s goes to %s." % (preState.bases[i].fullName(), \
+                print " * %s goes to %s." % (preState.bases[i].full_name(),
                                              event.runnerDestinations[i])
     print ''
 
 
-# import random
-# random.seed(0)
+import random
+import sys
+seed = random.randint(0, sys.maxint)
+random.seed(seed)
 
 def AB(p):
     return (1 - p.rateBB - p.rateHBP)
@@ -62,7 +64,7 @@ def playerString(p):
     slg = ('%.3f' % (SLG(p))).lstrip('0')
     ops = ('%.3f' % (OPS(p))).lstrip('0')
     
-    return '%20s (%s/%s/%s/%s)' % (p.fullName(), ba, obp, slg, ops)
+    return '%20s (%s/%s/%s/%s)' % (p.full_name(), ba, obp, slg, ops)
 
 def randomPlayer():
     p = Player(names.get_first_name(gender='male'), names.get_last_name())
@@ -107,15 +109,16 @@ if __name__ == '__main__':
 #     start = time()
     print
     for i in range(GAMES):
-        game = Game(homeTeam=home, awayTeam=away)
+        game = Game(home_team=home, away_team=away)
         for preState, postState, event in game.play():
             notify(preState, postState, event)
 
         print "--------------    FINAL   --------------"
-        print "Away: %s: %d" % (away.fullName(), game.state.awayRuns)
-        print "Home: %s: %d" % (home.fullName(), game.state.homeRuns)
+        print "Away: %s: %d" % (away.full_name(), game.state.awayRuns)
+        print "Home: %s: %d" % (home.full_name(), game.state.homeRuns)
         
 #     end = time()
     
 #     print 'Time Elapsed:', (end - start)
 #     print 'Games/Second:', GAMES / (end - start)
+print "\nseed =", seed
