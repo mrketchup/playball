@@ -10,7 +10,8 @@ class Player(object):
     The Player class. Contains all info on the player.
     """
 
-    def __init__(self, first_name='Dumb', last_name='Dummy'):
+    def __init__(self, retrosheet_id, first_name='Dumb', last_name='Dummy'):
+        self.retrosheet_id = retrosheet_id
         self.firstName = first_name
         self.lastName = last_name
         self.rate1B = 0.000

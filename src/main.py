@@ -4,17 +4,17 @@ Created on Jul 31, 2013
 @author: mejones
 """
 
-from random import random as rand
 import random
-
 import sys
 
 import names
+
 from playball.GameEventCallbacks import GameEventCallbacks
 from playball.GameManager import GameManager
 
+
 seed = random.randint(0, sys.maxint)
-random.seed(913586055)
+random.seed(seed)
 
 def AB(p):
     return (1 - p.rateBB - p.rateHBP)
@@ -48,7 +48,7 @@ def playerString(p):
     return '%20s (%s/%s/%s/%s)' % (p.full_name(), ba, obp, slg, ops)
 
 def randomPlayer():
-    p = Player(names.get_first_name(gender='male'), names.get_last_name())
+    p = Player(None, names.get_first_name(gender='male'), names.get_last_name())
     p.rate1B = random.gauss(0.154, 0.051)
     p.rate2B = random.gauss(0.044, 0.015)
     p.rate3B = random.gauss(0.004, 0.001)

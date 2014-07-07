@@ -19,7 +19,7 @@ class Team(object):
         self.defensiveLineup = []
 
         for i in range(9):
-            player = Player()
+            player = Player(None)
             self.offensiveLineup.append(player)
             self.defensiveLineup.append(player)
 
