@@ -5,35 +5,16 @@ Created on Jul 31, 2013
 """
 
 from random import random as rand
-from playball.GameEvent import Play
-import names
-
-
-def notify(preState, postState, event):
-    tb = "Bottom" if preState.inningBottom else "Top"
-    print "-------------- %6s  %2d --------------" % (tb, preState.inning)
-    print "Away: %s: %d" % (preState.awayTeam.full_name(), preState.awayRuns)
-    print "Home: %s: %d" % (preState.homeTeam.full_name(), preState.homeRuns)
-    print "Outs:", preState.outs
-    print "-" * 40
-
-    print "Batter:", event.batter.full_name()
-    print "Batting Result:", Play.PlayTypes.reverse_mapping[event.battingResult]
-
-    for i in range(1, len(preState.bases)):
-        if preState.bases[i] is not None and i != event.runnerDestinations[i]:
-            if event.runnerDestinations[i] >= 4:
-                print " * %s scores." % (preState.bases[i].full_name())
-            else:
-                print " * %s goes to %s." % (preState.bases[i].full_name(),
-                                             event.runnerDestinations[i])
-    print ''
-
-
 import random
+
 import sys
+
+import names
+from playball.GameEventCallbacks import GameEventCallbacks
+from playball.GameManager import GameManager
+
 seed = random.randint(0, sys.maxint)
-random.seed(seed)
+random.seed(913586055)
 
 def AB(p):
     return (1 - p.rateBB - p.rateHBP)
@@ -63,7 +44,7 @@ def playerString(p):
     obp = ('%.3f' % (OBP(p))).lstrip('0')
     slg = ('%.3f' % (SLG(p))).lstrip('0')
     ops = ('%.3f' % (OPS(p))).lstrip('0')
-    
+
     return '%20s (%s/%s/%s/%s)' % (p.full_name(), ba, obp, slg, ops)
 
 def randomPlayer():
@@ -81,48 +62,49 @@ if __name__ == '__main__':
     from playball import Team
     from playball import Game
 #     from time import time
-    
+
     home = Team('Hometown', 'Heroes')
     away = Team('Outtatown', 'Villains')
-    
+
     for i in range(9):
         p = randomPlayer()
         while BA(p) < .2:
             p = randomPlayer()
         away.offensiveLineup[i] = p
-    
+
     for i in range(9):
         p = randomPlayer()
         while BA(p) < .2:
             p = randomPlayer()
         home.offensiveLineup[i] = p
-        
+
     away.offensiveLineup = orderLineup(away.offensiveLineup)
     home.offensiveLineup = orderLineup(home.offensiveLineup)
-    
+
     print 'AWAY:'
     for i in range(9):
         print str(i+1) + ": " + playerString(away.offensiveLineup[i])
-    
+
     print 'HOME:'
     for i in range(9):
         print str(i+1) + ": " + playerString(home.offensiveLineup[i])
-    
+
     GAMES = 1
-    
+
 #     start = time()
     print
+    games = []
     for i in range(GAMES):
         game = Game(home_team=home, away_team=away)
-        for preState, postState, event in game.play():
-            notify(preState, postState, event)
+        games.append(game)
 
-        print "--------------    FINAL   --------------"
-        print "Away: %s: %d" % (away.full_name(), game.state.awayRuns)
-        print "Home: %s: %d" % (home.full_name(), game.state.homeRuns)
-        
+    manager = GameManager(games)
+    manager.subscribe_event_callback(GameEventCallbacks.print_event)
+    manager.subscribe_game_end_callback(GameEventCallbacks.print_game_end)
+    manager.play_games()
+
 #     end = time()
-    
+
 #     print 'Time Elapsed:', (end - start)
 #     print 'Games/Second:', GAMES / (end - start)
 print "\nseed =", seed
