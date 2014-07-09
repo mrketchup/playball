@@ -40,3 +40,6 @@ nosetests.xml
 # PyCharm
 /.idea/workspace.xml
 /.idea/dictionaries/
+
+# Virtual Env
+/env/
