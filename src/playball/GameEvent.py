@@ -145,7 +145,7 @@ class Play(GameEvent):
                      "PICKOFF_ERROR", "PICKOFF", "WILD_PITCH", "PASSED_BALL",
                      "BALK", "FOUL_ERROR", "WALK", "INTENTIONAL_WALK",
                      "HIT_BY_PITCH", "INTERFERENCE", "ERROR", "FIELDERS_CHOICE",
-                     "SINGLE", "DOUBLE", "TRIPLE", "HOMERUN")
+                     "SINGLE", "DOUBLE", "TRIPLE", "HOMERUN", "NO_PLAY")
 
     BattedBallTypes = Enum("FLY_BALL", "LINE_DRIVE", "POP_UP", "GROUND_BALL")
 
@@ -171,6 +171,7 @@ class Play(GameEvent):
         self.batterDestination = 0
         self.runnerDestinations = [None, None, None, None]
         self.runsOnPlay = 0
+        self.hitStrength = None
 
 
 class Substitution(GameEvent):

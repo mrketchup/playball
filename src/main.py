@@ -96,11 +96,11 @@ if __name__ == '__main__':
     games = []
     for i in range(GAMES):
         game = Game(home_team=home, away_team=away)
+        game.register_event_callback(GameEventCallbacks.print_event)
+        game.register_game_end_callback(GameEventCallbacks.print_game_end)
         games.append(game)
 
     manager = GameManager(games)
-    manager.subscribe_event_callback(GameEventCallbacks.print_event)
-    manager.subscribe_game_end_callback(GameEventCallbacks.print_game_end)
     manager.play_games()
 
 #     end = time()

@@ -1,11 +1,11 @@
 from collections import deque
 import csv
+import re
+import string
 import sys
 
-from playball import GameEvent, Game, Player
+from playball import GameEvent, Player
 from playball.GameEngine import GameEngine
-from playball.GameEventCallbacks import GameEventCallbacks
-from playball.GameManager import GameManager
 
 
 __author__ = 'Sam'
@@ -14,19 +14,22 @@ __author__ = 'Sam'
 class RetrosheetEngine(GameEngine):
     def __init__(self):
         self.records = deque()
+        self.events = deque()
 
     def append_record(self, event):
         self.records.append(event)
 
     def next_event(self, state):
         if len(self.records) > 0:
-            record = self.records.popleft()
-            return record.to_event()
+            while True:
+                record = self.records.popleft()
+                if isinstance(record, RetrosheetParser.Play):
+                    return record.to_event()
 
 
 class RetrosheetParser():
     def __init__(self, filename):
-        self.games = deque()
+        self.engines = deque()
         with open(filename, 'rb') as f:
             reader = csv.reader(f)
             engine = None
@@ -35,17 +38,10 @@ class RetrosheetParser():
                     record = RetrosheetParser.Record.parse_row(row)
                     if isinstance(record, RetrosheetParser.Id):
                         engine = RetrosheetEngine()
-                        game = Game(engine)
-                        self.games.append(game)
+                        self.engines.append(engine)
                     engine.append_record(record)
             except csv.Error as e:
                 sys.exit('file %s, line %d: %s' % (filename, reader.line_num, e))
-
-    def simulate_games(self):
-        manager = GameManager(self.games)
-        manager.subscribe_event_callback(GameEventCallbacks.print_event)
-        manager.subscribe_game_end_callback(GameEventCallbacks.print_game_end)
-        manager.play_games()
 
     class Record():
         def __init__(self):
@@ -134,7 +130,105 @@ class RetrosheetParser():
             play.balls = self.balls
             play.strikes = self.strikes
             play.pitchSequence = self.pitchSequence
-            # TODO - parse the play string
+            self.parse_play_string(play)
+            return play
+
+        def parse_play_string(self, play):
+            p = re.compile('(\w+)(/[A-Z1-9-\+]+)*(\..+)*')
+            m = p.match(self.playString)
+            if m is not None:
+                self.parse_description(m.group(1), play)
+                if m.group(2) is not None:
+                    self.parse_modifiers(m.group(2), play)
+                if m.group(3) is not None:
+                    self.parse_advances(m.group(3), play)
+            else:
+                raise Exception("Cannot parse play string:", self.playString)
+
+        @staticmethod
+        def parse_description(group, play):
+            play.fielders = group
+            if group[0] in string.digits:
+                play.battingResult = GameEvent.Play.PlayTypes.GENERIC_OUT
+                play.fielders = group
+            elif group[0] == 'S':
+                play.battingResult = GameEvent.Play.PlayTypes.SINGLE
+                play.fielders = group[1:]
+            elif group[0] == 'D':
+                play.battingResult = GameEvent.Play.PlayTypes.DOUBLE
+                play.fielders = group[1:]
+            elif group[0] == 'T':
+                play.battingResult = GameEvent.Play.PlayTypes.TRIPLE
+                play.fielders = group[1:]
+            elif group == 'W':
+                play.battingResult = GameEvent.Play.PlayTypes.WALK
+            elif group == 'HR':
+                play.battingResult = GameEvent.Play.PlayTypes.HOMERUN
+            elif group == 'K':
+                play.battingResult = GameEvent.Play.PlayTypes.STRIKEOUT
+            elif group == 'NP':
+                play.battingResult = GameEvent.Play.PlayTypes.NO_PLAY
+            else:
+                raise Exception("Cannot parse play description:", group)
+
+        @staticmethod
+        def parse_modifiers(group, play):
+            # remove the first /
+            group = group[1:]
+            modifiers = group.split('/')
+            for modifier in modifiers:
+                if modifier == 'G':
+                    play.battedBallType = GameEvent.Play.BattedBallTypes.GROUND_BALL
+                elif modifier == 'G-':
+                    play.battedBallType = GameEvent.Play.BattedBallTypes.GROUND_BALL
+                    play.hitStrength = '-'
+                elif modifier == 'G+':
+                    play.battedBallType = GameEvent.Play.BattedBallTypes.GROUND_BALL
+                    play.hitStrength = '+'
+                elif modifier == 'F':
+                    play.battedBallType = GameEvent.Play.BattedBallTypes.FLY_BALL
+                elif modifier == 'L':
+                    play.battedBallType = GameEvent.Play.BattedBallTypes.LINE_DRIVE
+                elif modifier == 'L+':
+                    play.battedBallType = GameEvent.Play.BattedBallTypes.LINE_DRIVE
+                    play.hitStrength = '+'
+                elif modifier == 'P':
+                    play.battedBallType = GameEvent.Play.BattedBallTypes.POP_UP
+                elif modifier == 'BG':
+                    play.battedBallType = GameEvent.Play.BattedBallTypes.GROUND_BALL
+                    play.isBunt = True
+                elif modifier[0].isdigit():
+                    play.hitLocation = modifier
+                else:
+                    raise Exception("Cannot parse modifier:", modifier)
+
+        @staticmethod
+        def parse_advances(group, play):
+            # remove the .
+            group = group[1:]
+            advances = group.split(';')
+            for advance in advances:
+                if advance[1] == '-':
+                    bases = advance.split('-')
+                    runner = bases[0]
+                    destination = bases[1]
+                    if destination == 'H':
+                        destination = 4
+                    if runner == 'B':
+                        play.batterDestination = destination
+                    elif runner.isdigit():
+                        play.runnerDestinations[int(runner)] = destination
+                    else:
+                        raise Exception("Cannot parse advance:", group)
+                elif advance[1] == 'X':
+                    p = re.compile('([B123])X([123H])\((\d+)\)')
+                    m = p.match(advance)
+                    if m is not None:
+                        play.fielders = m.group(3)
+                    else:
+                        raise Exception("Cannot parse advance:", group)
+                else:
+                    raise Exception("Cannot parse advance:", group)
 
     class Sub(Record):
         def __init__(self, record):
