@@ -40,7 +40,7 @@ class Id(RetrosheetRecord):
         self.gameid = row[1]
 
     def __str__(self):
-        return "id, {0}".format(self.gameid)
+        return "id,{0}".format(self.gameid)
 
 
 class Version(RetrosheetRecord):
@@ -49,7 +49,7 @@ class Version(RetrosheetRecord):
         self.version = row[1]
 
     def __str__(self):
-        return "version, {0}".format(self.version)
+        return "version,{0}".format(self.version)
 
 
 class Info(RetrosheetRecord):
@@ -59,7 +59,7 @@ class Info(RetrosheetRecord):
         self.value = row[2]
 
     def __str__(self):
-        return "info, {0}, {1}".format(self.name, self.value)
+        return "info,{0},{1}".format(self.name, self.value)
 
 
 class Start(RetrosheetRecord):
@@ -72,8 +72,8 @@ class Start(RetrosheetRecord):
         self.fielding_position = row[5]
 
     def __str__(self):
-        return "start, {0}, {1}, {2}, {3}, {4}".format(self.retrosheet_id, self.player_name, self.team,
-                                                       self.batting_position, self.fielding_position)
+        return 'start,{0},"{1}",{2},{3},{4}'.format(self.retrosheet_id, self.player_name, self.team,
+                                                    self.batting_position, self.fielding_position)
 
 
 class Play(RetrosheetRecord):
@@ -88,7 +88,7 @@ class Play(RetrosheetRecord):
         self.playString = row[6]
 
     def __str__(self):
-        return "play, {0}, {1}, {2}, {3}{4}, {5}, {6}".format(
+        return "play,{0},{1},{2},{3}{4},{5},{6}".format(
             self.inning, self.inningHalf, self.batterId, self.balls, self.strikes, self.pitchSequence,
             self.playString
         )
@@ -210,7 +210,7 @@ class Sub(RetrosheetRecord):
         self.position = int(row[5])
 
     def __str__(self):
-        return "sub, {0}, {1}, {2}, {3}, {4}".format(
+        return 'sub,{0},"{1}",{2},{3},{4}'.format(
             self.playerId, self.playerName, self.team, self.battingOrder, self.position
         )
 
@@ -221,7 +221,7 @@ class Com(RetrosheetRecord):
         self.comment = row[1]
 
     def __str__(self):
-        return "com, {0}".format(self.comment)
+        return 'com,"{0}"'.format(self.comment)
 
 
 class Data(RetrosheetRecord):
@@ -232,4 +232,4 @@ class Data(RetrosheetRecord):
         self.value = row[3]
 
     def __str__(self):
-        return "data, {0}, {1}, {2}".format(self.name, self.retrosheet_id, self.value)
+        return "data,{0},{1},{2}".format(self.name, self.retrosheet_id, self.value)
