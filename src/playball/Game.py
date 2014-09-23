@@ -7,6 +7,7 @@ Created on Jul 31, 2013
 from GameState import GameState
 from Team import Team
 from GameEngine import GameEngine
+from playball import GameEvent
 
 
 class Game():
@@ -68,7 +69,10 @@ class Game():
         while self.state.outs < 3 and self._continue_playing():
             event = self.engine.next_event(self.state)
             prestate = self.state
-            poststate = self.state.add_event(event)
+            if isinstance(event, GameEvent.Play):
+                poststate = self.state.add_event(event)
+            else:
+                poststate = prestate
 
             yield prestate, poststate, event
 

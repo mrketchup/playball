@@ -1,23 +1,14 @@
-from collections import deque
-
 from playball.GameEngine import GameEngine
-from playball.RetrosheetRecord import RetrosheetRecord
-
 
 __author__ = 'Sam'
 
 
 class RetrosheetEngine(GameEngine):
-    def __init__(self):
-        self.records = deque()
-        self.events = deque()
-
-    def append_record(self, event):
-        self.records.append(event)
+    def __init__(self, retrosheet_game):
+        self.retrosheet_game = retrosheet_game
+        self.event_idx = 0
 
     def next_event(self, state):
-        if len(self.records) > 0:
-            while True:
-                record = self.records.popleft()
-                if isinstance(record, RetrosheetRecord.Play):
-                    return record.to_event()
+        event = self.retrosheet_game.event_records[self.event_idx].to_event()
+        self.event_idx += 1
+        return event

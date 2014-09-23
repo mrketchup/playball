@@ -34,13 +34,18 @@ class RetrosheetRecord():
             raise Exception("Cannot parse row: %s" % row)
 
 
+class Event(RetrosheetRecord):
+    def __init__(self, row):
+        RetrosheetRecord.__init__(self, row[0])
+
+
 class Id(RetrosheetRecord):
     def __init__(self, row):
         RetrosheetRecord.__init__(self, row[0])
-        self.gameid = row[1]
+        self.game_id = row[1]
 
     def __str__(self):
-        return "id,{0}".format(self.gameid)
+        return "id,{0}".format(self.game_id)
 
 
 class Version(RetrosheetRecord):
@@ -76,7 +81,7 @@ class Start(RetrosheetRecord):
                                                     self.batting_position, self.fielding_position)
 
 
-class Play(RetrosheetRecord):
+class Play(Event):
     def __init__(self, row):
         RetrosheetRecord.__init__(self, row[0])
         self.inning = int(row[1])
@@ -103,7 +108,7 @@ class Play(RetrosheetRecord):
         return play
 
     def parse_play_string(self, play):
-        p = re.compile('(\w+)(/[A-Z1-9-\+]+)*(\..+)*')
+        p = re.compile('([\w\(\)]+)(/[A-Z1-9-\+]+)*(\..+)*')
         m = p.match(self.playString)
         if m is not None:
             self.parse_description(m.group(1), play)
@@ -120,21 +125,29 @@ class Play(RetrosheetRecord):
         if group[0] in string.digits:
             play.battingResult = GameEvent.Play.PlayTypes.GENERIC_OUT
             play.fielders = group
+            play.outsOnPlay = 1
         elif group[0] == 'S':
             play.battingResult = GameEvent.Play.PlayTypes.SINGLE
+            play.batterDestination = 1
             play.fielders = group[1:]
         elif group[0] == 'D':
             play.battingResult = GameEvent.Play.PlayTypes.DOUBLE
+            play.batterDestination = 2
             play.fielders = group[1:]
         elif group[0] == 'T':
             play.battingResult = GameEvent.Play.PlayTypes.TRIPLE
+            play.batterDestination = 3
             play.fielders = group[1:]
         elif group == 'W':
             play.battingResult = GameEvent.Play.PlayTypes.WALK
+            play.batterDestination = 1
         elif group == 'HR':
             play.battingResult = GameEvent.Play.PlayTypes.HOMERUN
+            play.batterDestination = 4
+            play.runsOnPlay += 1
         elif group == 'K':
             play.battingResult = GameEvent.Play.PlayTypes.STRIKEOUT
+            play.outsOnPlay = 1
         elif group == 'NP':
             play.battingResult = GameEvent.Play.PlayTypes.NO_PLAY
         else:
@@ -168,6 +181,8 @@ class Play(RetrosheetRecord):
                 play.isBunt = True
             elif modifier[0].isdigit():
                 play.hitLocation = modifier
+            elif modifier == 'GDP':
+                play.outsOnPlay = 2
             else:
                 raise Exception("Cannot parse modifier:", modifier)
 
@@ -178,15 +193,14 @@ class Play(RetrosheetRecord):
         advances = group.split(';')
         for advance in advances:
             if advance[1] == '-':
-                bases = advance.split('-')
-                runner = bases[0]
-                destination = bases[1]
+                (runner, destination) = advance.split('-')
                 if destination == 'H':
                     destination = 4
+                    play.runsOnPlay += 1
                 if runner == 'B':
-                    play.batterDestination = destination
+                    play.batterDestination = int(destination)
                 elif runner.isdigit():
-                    play.runnerDestinations[int(runner)] = destination
+                    play.runnerDestinations[int(runner)] = int(destination)
                 else:
                     raise Exception("Cannot parse advance:", group)
             elif advance[1] == 'X':
@@ -200,7 +214,7 @@ class Play(RetrosheetRecord):
                 raise Exception("Cannot parse advance:", group)
 
 
-class Sub(RetrosheetRecord):
+class Sub(Event):
     def __init__(self, row):
         RetrosheetRecord.__init__(self, row[0])
         self.playerId = row[1]
@@ -214,14 +228,27 @@ class Sub(RetrosheetRecord):
             self.playerId, self.playerName, self.team, self.battingOrder, self.position
         )
 
+    def to_event(self):
+        play = GameEvent.Substitution()
+        # TODO - should get the player from a global list
+        play.player = Player(self.playerId)
+        play.team = self.team
+        play.offensiveLineupIndex = self.battingOrder
+        play.defensiveLineupIndex = self.position
+        return play
 
-class Com(RetrosheetRecord):
+
+class Com(Event):
     def __init__(self, row):
         RetrosheetRecord.__init__(self, row[0])
         self.comment = row[1]
 
     def __str__(self):
         return 'com,"{0}"'.format(self.comment)
+
+    def to_event(self):
+        play = GameEvent.Comment()
+        play.comment = self.comment
 
 
 class Data(RetrosheetRecord):

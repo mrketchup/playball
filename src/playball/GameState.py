@@ -37,8 +37,7 @@ class GameState(object):
 
         for i in range(1, len(new_state.bases)):
             destination = event.runnerDestinations[i]
-            if destination is not None and destination in range(1, len(
-                    new_state.bases)):
+            if destination is not None and destination in range(1, len(new_state.bases)):
                 new_state.bases[destination] = self.bases[i]
 
         if new_state.inningBottom:
@@ -50,9 +49,8 @@ class GameState(object):
             new_index = (new_state.awayOffensiveLineupIndex + 1) % 9
             new_state.awayOffensiveLineupIndex = new_index
 
-        if event.batterDestination == 0:
-            new_state.outs += 1
-        elif event.batterDestination < 4:
+        new_state.outs += event.outsOnPlay
+        if event.batterDestination in range(1, len(new_state.bases)):
             new_state.bases[event.batterDestination] = event.batter
 
         return new_state

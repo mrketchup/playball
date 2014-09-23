@@ -15,20 +15,23 @@ class RetrosheetScorebook():
             try:
                 for row in reader:
                     record = RetrosheetRecord.parse_row(row)
-                    if record.record_type == 'id':
+                    record_type = record.record_type
+                    if record_type == 'id':
                         game = RetrosheetGame()
                         game.id_record = record
                         self.games.append(game)
-                    elif record.record_type == 'version':
+                    elif record_type == 'version':
                         game.version_record = record
-                    elif record.record_type == 'info':
+                    elif record_type == 'info':
                         game.info_records.append(record)
-                    elif record.record_type == 'start':
+                    elif record_type == 'start':
                         game.start_records.append(record)
-                    elif record.record_type == 'data':
+                    elif record_type == 'data':
                         game.data_records.append(record)
-                    else:
+                    elif record_type == 'play' or record_type == 'sub' or record_type == 'com':
                         game.event_records.append(record)
+                    else:
+                        raise Exception("Unsupported record type")
             except csv.Error as e:
                 sys.exit('file %s, line %d: %s' % (filename, reader.line_num, e))
             f.close()
