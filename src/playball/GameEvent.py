@@ -172,6 +172,8 @@ class Play(GameEvent):
         self.runnerDestinations = [None, None, None, None]
         self.runsOnPlay = 0
         self.hitStrength = None
+        self.exceptionalPlay = False
+        self.groundedDoublePlay = False
 
 
 class Substitution(GameEvent):

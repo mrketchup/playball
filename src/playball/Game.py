@@ -71,8 +71,18 @@ class Game():
             prestate = self.state
             if isinstance(event, GameEvent.Play):
                 poststate = self.state.add_event(event)
-            else:
+            elif isinstance(event, GameEvent.Substitution):
+                # TODO - move this to a function (add_substitution)
+                team = self.state.homeTeam if event.team == 1 else self.state.awayTeam
+                if event.offensiveLineupIndex > 0:
+                    team.offensiveLineup[event.offensiveLineupIndex - 1] = event.player
+                if 0 < event.defensiveLineupIndex <= 9:
+                    team.defensiveLineup[event.defensiveLineupIndex - 1] = event.player
                 poststate = prestate
+            elif isinstance(event, GameEvent.Comment):
+                poststate = prestate
+            else:
+                raise Exception("Unsupported event type")
 
             yield prestate, poststate, event
 

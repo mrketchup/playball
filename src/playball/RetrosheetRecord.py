@@ -108,7 +108,7 @@ class Play(Event):
         return play
 
     def parse_play_string(self, play):
-        p = re.compile('([\w\(\)]+)(/[A-Z1-9-\+]+)*(\..+)*')
+        p = re.compile('^([\w\(\)!]+)(/[A-Z1-9-\+]+)*(\..+)*$')
         m = p.match(self.playString)
         if m is not None:
             self.parse_description(m.group(1), play)
@@ -116,6 +116,8 @@ class Play(Event):
                 self.parse_modifiers(m.group(2), play)
             if m.group(3) is not None:
                 self.parse_advances(m.group(3), play)
+            elif play.groundedDoublePlay:  # default GDP advance
+                play.runnerDestinations[1] = 0
         else:
             raise Exception("Cannot parse play string:", self.playString)
 
@@ -153,6 +155,9 @@ class Play(Event):
         else:
             raise Exception("Cannot parse play description:", group)
 
+        if "!" in group:
+            play.exceptionalPlay = True
+
     @staticmethod
     def parse_modifiers(group, play):
         # remove the first /
@@ -183,6 +188,7 @@ class Play(Event):
                 play.hitLocation = modifier
             elif modifier == 'GDP':
                 play.outsOnPlay = 2
+                play.groundedDoublePlay = True
             else:
                 raise Exception("Cannot parse modifier:", modifier)
 
@@ -208,6 +214,9 @@ class Play(Event):
                 m = p.match(advance)
                 if m is not None:
                     play.fielders = m.group(3)
+                    if m.group(1).isdigit():
+                        play.runnerDestinations[int(m.group(1))] = 0
+                        play.outsOnPlay += 1
                 else:
                     raise Exception("Cannot parse advance:", group)
             else:

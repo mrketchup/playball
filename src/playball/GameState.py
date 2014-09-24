@@ -37,7 +37,9 @@ class GameState(object):
 
         for i in range(1, len(new_state.bases)):
             destination = event.runnerDestinations[i]
-            if destination is not None and destination in range(1, len(new_state.bases)):
+            if destination is None and self.bases[i] is not None:
+                new_state.bases[i] = self.bases[i]
+            elif destination is not None and destination in range(1, len(new_state.bases)):
                 new_state.bases[destination] = self.bases[i]
 
         if new_state.inningBottom:
