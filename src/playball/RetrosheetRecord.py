@@ -24,10 +24,11 @@ class RetrosheetRecord():
             return Start(retrosheet_id=row[1], player_name=row[2], team=row[3], batting_position=row[4],
                          fielding_position=row[5])
         elif row_type == 'play':
-            return Play(inning=row[1], inning_half=row[2], batter_id=row[3], balls=row[4][0], strikes=row[4][1],
-                        pitch_sequence=row[5], play_string=row[6])
+            return Play(inning=int(row[1]), inning_half=int(row[2]), batter_id=row[3], balls=int(row[4][0]),
+                        strikes=int(row[4][1]), pitch_sequence=row[5], play_string=row[6])
         elif row_type == 'sub':
-            return Sub(player_id=row[1], player_name=row[2], team=row[3], batting_order=row[4], position=row[5])
+            return Sub(player_id=row[1], player_name=row[2], team=int(row[3]), batting_order=int(row[4]),
+                       position=int(row[5]))
         elif row_type == 'com':
             return Com(comment=row[1])
         elif row_type == 'data':
@@ -82,11 +83,11 @@ class Play(RetrosheetRecord):
     def __init__(self, inning=None, inning_half=None, batter_id=None, balls=None, strikes=None, pitch_sequence=None,
                  play_string=None):
         RetrosheetRecord.__init__(self, "play")
-        self.inning = int(inning)
-        self.inningHalf = int(inning_half)
+        self.inning = inning
+        self.inningHalf = inning_half
         self.batterId = batter_id
-        self.balls = int(balls)
-        self.strikes = int(strikes)
+        self.balls = balls
+        self.strikes = strikes
         self.pitchSequence = pitch_sequence
         self.playString = play_string
 
@@ -121,35 +122,34 @@ class Play(RetrosheetRecord):
 
     @staticmethod
     def parse_description(group, play):
-        play.fielders = group
         if group[0] in string.digits:
-            play.battingResult = GameEvent.Play.PlayTypes.GENERIC_OUT
+            play.playType = GameEvent.Play.PlayTypes.GENERIC_OUT
             play.fielders = group
             play.outsOnPlay = 1
         elif group[0] == 'S':
-            play.battingResult = GameEvent.Play.PlayTypes.SINGLE
+            play.playType = GameEvent.Play.PlayTypes.SINGLE
             play.batterDestination = 1
             play.fielders = group[1:]
         elif group[0] == 'D':
-            play.battingResult = GameEvent.Play.PlayTypes.DOUBLE
+            play.playType = GameEvent.Play.PlayTypes.DOUBLE
             play.batterDestination = 2
             play.fielders = group[1:]
         elif group[0] == 'T':
-            play.battingResult = GameEvent.Play.PlayTypes.TRIPLE
+            play.playType = GameEvent.Play.PlayTypes.TRIPLE
             play.batterDestination = 3
             play.fielders = group[1:]
         elif group == 'W':
-            play.battingResult = GameEvent.Play.PlayTypes.WALK
+            play.playType = GameEvent.Play.PlayTypes.WALK
             play.batterDestination = 1
         elif group == 'HR':
-            play.battingResult = GameEvent.Play.PlayTypes.HOMERUN
+            play.playType = GameEvent.Play.PlayTypes.HOMERUN
             play.batterDestination = 4
             play.runsOnPlay += 1
         elif group == 'K':
-            play.battingResult = GameEvent.Play.PlayTypes.STRIKEOUT
+            play.playType = GameEvent.Play.PlayTypes.STRIKEOUT
             play.outsOnPlay = 1
         elif group == 'NP':
-            play.battingResult = GameEvent.Play.PlayTypes.NO_PLAY
+            play.playType = GameEvent.Play.PlayTypes.NO_PLAY
         else:
             raise Exception("Cannot parse play description:", group)
 
@@ -226,9 +226,9 @@ class Sub(RetrosheetRecord):
         RetrosheetRecord.__init__(self, "sub")
         self.playerId = player_id
         self.playerName = player_name
-        self.team = int(team)
-        self.battingOrder = int(batting_order)
-        self.position = int(position)
+        self.team = team
+        self.battingOrder = batting_order
+        self.position = position
 
     def __str__(self):
         return 'sub,{0},"{1}",{2},{3},{4}'.format(
