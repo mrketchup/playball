@@ -1,7 +1,8 @@
 from playball import Game
-from playball.GameEventCallbacks import GameEventCallbacks
 from playball.GameManager import GameManager
+from playball.RetrosheetCallbacks import RetrosheetCallbacks
 from playball.RetrosheetEngine import RetrosheetEngine
+from playball.RetrosheetGame import RetrosheetGame
 from playball.RetrosheetScorebook import RetrosheetScorebook
 
 __author__ = 'sam'
@@ -13,8 +14,14 @@ game = scorebook.games[0]
 engine = RetrosheetEngine(game)
 
 game = Game(engine)
-game.register_event_callback(GameEventCallbacks.print_event)
-game.register_game_end_callback(GameEventCallbacks.print_game_end)
+retrosheet_game = RetrosheetGame()
+callbacks = RetrosheetCallbacks(retrosheet_game)
+game.register_event_callback(callbacks.record_event)
+game.register_game_end_callback(callbacks.record_game_end)
 
 manager = GameManager([game])
 manager.play_games()
+
+scorebook = RetrosheetScorebook()
+scorebook.games[0] = engine.retrosheet_game
+scorebook.write("output.txt")
